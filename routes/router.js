@@ -15,15 +15,14 @@ Router.post("/addItem",(req,res)=>{
     const itemName = req.body.itemName;
     const imgURL = req.body.imgURL;
     const description = req.body.description;
-    const unitPrice = req.body.unitPrice;
-
+    const price = req.body.price;
 
     const item = new Item({
-        itemId : id,
+        itemID : id,
         itemName : itemName,
         imgURL : imgURL,
         description : description,
-        unitPrice: unitPrice
+        price: price
     });
 
     item.save(err => {
@@ -46,29 +45,29 @@ Router.get("/items",(req,res)=>{
 });
 
 Router.put("/updateItem",(req,res)=>{
-    const itemId =  req.body.itemId;
+    const itemID =  req.body.itemID;
     const itemName = req.body.itemName;
     const imgURL = req.body.imgURL;
     const description = req.body.description;
-    const unitPrice = req.body.unitPrice;
+    const price = req.body.price;
 
-    const query = {itemId:itemId};
-
+    const query = {itemID:itemID};
     Item.findOneAndUpdate(query,{$set:{
-            itemId : itemId,
             itemName : itemName,
             imgURL : imgURL,
             description : description,
-            unitPrice: unitPrice
+            price: price
     }},(err)=>{
         if (err) return res.status(500).send(err);
-        return res.status(200).send(itemId)
+        return res.status(200).send(itemID)
     });
 });
 
 Router.delete("/deleteItem",(req,res)=>{
-    const itemId =  req.body.itemId;
-    const query = {itemId: itemId};
+    const itemID =  req.body.itemID;
+    const query = {itemID: itemID};
+
+    console.log("Working"+itemID)
     Item.findOneAndDelete(query,(err,result)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(result);
