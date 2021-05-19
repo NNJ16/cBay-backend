@@ -193,6 +193,7 @@ Router.post("/addUser",(req,res)=>{
     const userEmail = req.body.userEmail;
     const userPw = req.body.userPw;
     const userPhone = req.body.userPhone;
+    const userType = req.body.userType;
 
 
     const user = new User({
@@ -201,7 +202,8 @@ Router.post("/addUser",(req,res)=>{
         userAddress : userAddress,
         userEmail : userEmail,
         userPw: userPw,
-        userPhone: userPhone
+        userPhone: userPhone,
+        userType : userType
 
     });
 
@@ -231,6 +233,7 @@ Router.put("/updateUser",(req,res)=>{
     const userEmail = req.body.userEmail;
     const userPw = req.body.userPw;
     const userPhone = req.body.userPhone;
+    const userType = req.body.userType;
 
     const query = {userId:userId};
 
@@ -240,7 +243,8 @@ Router.put("/updateUser",(req,res)=>{
             userAddress : userAddress,
             userEmail : userEmail,
             userPw: userPw,
-            userPhone: userPhone
+            userPhone: userPhone,
+            userType : userType
     }},(err)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(userId)

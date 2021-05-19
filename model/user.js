@@ -6,7 +6,8 @@ const UserSchema = new mongoose.Schema({
      userAddress : "String",
      userEmail : "String",
      userPw: "String",
-     userPhone: "String"
+     userPhone: "String",
+     userType:"String"
 });
 
 
