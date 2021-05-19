@@ -50,7 +50,6 @@ Router.get("/items",(req,res)=>{
 
 Router.post("/items",(req,res)=>{
     const userId = req.body.userId;
-    console.log("UserID : "+userId);
     Item.find({userId: userId},(err,result)=>{
         if(err){
             console.log(err);
@@ -60,6 +59,7 @@ Router.post("/items",(req,res)=>{
         }
     });
 });
+
 Router.put("/updateItem",(req,res)=>{
     const itemID =  req.body.itemID;
     const itemName = req.body.itemName;
@@ -117,8 +117,7 @@ Router.post("/addUser",(req,res)=>{
 
 Router.post("/login",(req,res)=>{
     const email = req.body.email;
-    const password = req.body.password;
-    User.find({email:email,password:password},(err,result)=>{
+    User.find({email:email},(err,result)=>{
         if(err){
             console.log(err);
         }else{
