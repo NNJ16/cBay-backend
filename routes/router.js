@@ -4,13 +4,14 @@ const Router = express.Router();
 const Item = require("../model/item");
 const User = require("../model/user");
 const uuid = require("uuid");
+const nodemailer = require('nodemailer');
 const connectDB = require("../config/database");
 
 const app = express();
 app.use(bodyParser.urlencoded({extended:true}));
 
 connectDB();
-
+//Item REST -----------------------------------------------------------------------------------------------
 Router.post("/addItem",(req,res)=>{
     const id = uuid.v4();
     const itemName = req.body.itemName;
@@ -60,6 +61,18 @@ Router.post("/items",(req,res)=>{
     });
 });
 
+Router.post("/search",(req,res)=>{
+    const itemName = req.body.itemName;
+    Item.find({itemName: { $regex: '.*' + itemName + '.*' } },(err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            const items = result;
+            res.send(items);
+        }
+    });
+});
+
 Router.put("/updateItem",(req,res)=>{
     const itemID =  req.body.itemID;
     const itemName = req.body.itemName;
@@ -90,6 +103,7 @@ Router.delete("/deleteItem",(req,res)=>{
     });
 });
 
+//USER REST -----------------------------------------------------------------------------------------------
 Router.post("/addUser",(req,res)=>{
     const id = uuid.v4();
     const name = req.body.name;
@@ -170,5 +184,39 @@ Router.delete("/deleteUser",(req,res)=>{
     });
     console.log("User Deleted Successfully..");
 });
+//MAIL SERVICE -----------------------------------------------------------------------------------------------
+Router.post(("/mail"),async (req,res)=>{
+    const frommail="skumaratttt@gmail.com";
+    const password = "**********";
+    const tomail=req.body.tomail;
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: frommail,
+            pass: password
+        }
+    });
+
+    var mailOptions = {
+        from: frommail,
+        to: tomail,
+        subject: 'Sending Email using Node.js',
+        text: `sending mail using Node.js was running successfully. Hope it help you. For more code and project Please Refer my github page`
+    };
+
+    await transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            res.json({
+                msg: 'fail'
+            });
+        } else {
+            res.json({
+                msg: 'success'
+            })
+        }
+    });
+
+})
 
 module.exports = Router;
