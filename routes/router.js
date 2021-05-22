@@ -12,25 +12,21 @@ const app = express();
 app.use(bodyParser.urlencoded({extended:true}));
 
 connectDB();
-
 Router.post("/addItem",(req,res)=>{
     const id = uuid.v4();
     const itemName = req.body.itemName;
     const imgURL = req.body.imgURL;
     const description = req.body.description;
-<<<<<<< HEAD
-    const unitPrice = req.body.unitPrice;
-    
-=======
     const price = req.body.price;
->>>>>>> cde9b9b23d69dead32cb4948a5914b25bf2b3dc7
+    const userId = req.body.userId;
 
     const item = new Item({
         itemID : id,
         itemName : itemName,
         imgURL : imgURL,
         description : description,
-        price: price
+        price: price,
+        userId: userId
     });
 
     item.save(err => {
@@ -38,6 +34,7 @@ Router.post("/addItem",(req,res)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(item)
     });
+    
     console.log("Item Added Successfully..");
 });
 
@@ -52,19 +49,45 @@ Router.get("/items",(req,res)=>{
     });
 });
 
+Router.post("/items",(req,res)=>{
+    const userId = req.body.userId;
+    Item.find({userId: userId},(err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            const items = result;
+            res.send(items);
+        }
+    });
+});
+
+Router.post("/search",(req,res)=>{
+    const itemName = req.body.itemName;
+    Item.find({itemName: { $regex: '.*' + itemName + '.*' } },(err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            const items = result;
+            res.send(items);
+        }
+    });
+});
+
 Router.put("/updateItem",(req,res)=>{
     const itemID =  req.body.itemID;
     const itemName = req.body.itemName;
     const imgURL = req.body.imgURL;
     const description = req.body.description;
     const price = req.body.price;
+    const userId = req.body.userId;
 
     const query = {itemID:itemID};
     Item.findOneAndUpdate(query,{$set:{
             itemName : itemName,
             imgURL : imgURL,
             description : description,
-            price: price
+            price: price,
+            userId: userId
     }},(err)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(itemID)
@@ -74,13 +97,127 @@ Router.put("/updateItem",(req,res)=>{
 Router.delete("/deleteItem",(req,res)=>{
     const itemID =  req.body.itemID;
     const query = {itemID: itemID};
-
-    console.log("Working"+itemID)
     Item.findOneAndDelete(query,(err,result)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(result);
     });
 });
+
+//USER REST -----------------------------------------------------------------------------------------------
+Router.post("/addUser",(req,res)=>{
+    const id = uuid.v4();
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+    const type = req.body.type;
+
+    const user = new User({
+        userId : id,
+        name : name,
+        email : email,
+        password: password,
+        phone: phone,
+        type : type
+    });
+
+    user.save(err => {
+        console.log(err);
+        if (err) return res.status(500).send(err);
+        return res.status(200).send(user)
+    });
+    console.log("User Added Successfully..");
+});
+
+Router.post("/login",(req,res)=>{
+    const email = req.body.email;
+    User.find({email:email},(err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            const user = result;
+            res.send(user);
+        }
+    });
+});
+Router.get("/getUsers",(req,res)=>{
+    User.find((err,result)=>{
+        if(err){
+            console.log(err);
+        }else{
+            const users = result;
+            res.send(users);
+        }
+    });
+});
+
+Router.put("/updateUser",(req,res)=>{
+    const userId =  req.body.userId;
+    const name = req.body.name;
+    const email = req.body.email;
+    const password = req.body.password;
+    const phone = req.body.phone;
+    const type = req.body.type;
+
+    const query = {userId:userId};
+
+    User.findOneAndUpdate(query,{$set:{
+            name : name,
+            email : email,
+            password: password,
+            phone: phone,
+            type : type
+        }},(err)=>{
+        if (err) return res.status(500).send(err);
+        return res.status(200).send(userId)
+    });
+    console.log("User Updated Successfully..");
+});
+
+Router.delete("/deleteUser",(req,res)=>{
+    const userId =  req.body.userId;
+    const query = {userId: userId};
+
+    User.findOneAndDelete(query,(err,result)=>{
+        if (err) return res.status(500).send(err);
+        return res.status(200).send(result);
+    });
+    console.log("User Deleted Successfully..");
+});
+//MAIL SERVICE -----------------------------------------------------------------------------------------------
+Router.post(("/mail"),async (req,res)=>{
+    const frommail="skumaratttt@gmail.com";
+    const password = "**********";
+    const tomail=req.body.tomail;
+
+    var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: frommail,
+            pass: password
+        }
+    });
+
+    var mailOptions = {
+        from: frommail,
+        to: tomail,
+        subject: 'Sending Email using Node.js',
+        text: `sending mail using Node.js was running successfully. Hope it help you. For more code and project Please Refer my github page`
+    };
+
+    await transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            res.json({
+                msg: 'fail'
+            });
+        } else {
+            res.json({
+                msg: 'success'
+            })
+        }
+    });
+
+})
 
 
 
@@ -89,31 +226,31 @@ Router.delete("/deleteItem",(req,res)=>{
 Router.post("/addOrder",(req,res)=>{
     const id = uuid.v4();
     const orderUid = req.body.orderUid;
-    const orderName = req.body.orderName;
-    const qty = req.body.qty;
-    const description = req.body.description;
+    const username = req.body.username;
+    const orderDesc = req.body.orderDesc;
     const orderAddress = req.body.orderAddress;
     const city = req.body.city;
     const zipcode = req.body.zipcode;
     const province = req.body.province;
     const orderPrice = req.body.orderPrice;
     const orderDate = req.body.orderDate;
-    const orderStatus = req.body.orderStatus;
+    const paymentType = req.body.paymentType;
+    const deliveryStatus = req.body.deliveryStatus;
 
 
     const order = new Order({
         orderId : id,
         orderUid : orderUid,
-        orderName : orderName,
-        qty : qty,
-        description: description,
+        username :username,
+        orderDesc : orderDesc,
         orderAddress : orderAddress,
         city : city,
         zipcode : zipcode,
         province : province,
         orderPrice: orderPrice,
         orderDate : orderDate,
-        orderStatus:orderStatus,
+        paymentType:paymentType,
+        deliveryStatus:deliveryStatus,
 
     });
 
@@ -140,32 +277,33 @@ Router.get("/getOrders",(req,res)=>{
 Router.put("/updateOrder",(req,res)=>{
     const orderId =  req.body.orderId;
     const orderUid = req.body.orderUid;
-    const orderName = req.body.orderName;
-    const qty = req.body.qty;
-    const description = req.body.description;
+    const username = req.body.username;
+    const orderDesc = req.body.orderDesc;
     const orderAddress = req.body.orderAddress;
     const city = req.body.city;
     const zipcode = req.body.zipcode;
     const province = req.body.province;
     const orderPrice = req.body.orderPrice;
     const orderDate = req.body.orderDate;
-    const orderStatus = req.body.orderStatus;
+    const paymentType = req.body.paymentType;
+    const deliveryStatus = req.body.deliveryStatus;
 
     const query = {orderId:orderId};
 
     Order.findOneAndUpdate(query,{$set:{
         orderId : id,
         orderUid : orderUid,
-        orderName : orderName,
-        qty : qty,
-        description: description,
+        username :username,
+        orderDesc : orderDesc,
         orderAddress : orderAddress,
         city : city,
         zipcode : zipcode,
         province : province,
         orderPrice: orderPrice,
         orderDate : orderDate,
-        orderStatus:orderStatus,
+        paymentType:paymentType,
+        deliveryStatus:deliveryStatus
+        
     }},(err)=>{
         if (err) return res.status(500).send(err);
         return res.status(200).send(orderId)
@@ -185,87 +323,6 @@ Router.delete("/deleteOrder",(req,res)=>{
 });
 
 
-
-
-//User Part
-
-
-Router.post("/addUser",(req,res)=>{
-    const id = uuid.v4();
-    const userName = req.body.userName;
-    const userAddress = req.body.userAddress;
-    const userEmail = req.body.userEmail;
-    const userPw = req.body.userPw;
-    const userPhone = req.body.userPhone;
-    const userType = req.body.userType;
-
-
-    const user = new User({
-        userId : id,
-        userName : userName,
-        userAddress : userAddress,
-        userEmail : userEmail,
-        userPw: userPw,
-        userPhone: userPhone,
-        userType : userType
-
-    });
-
-    user.save(err => {
-        console.log(err);
-        if (err) return res.status(500).send(err);
-        return res.status(200).send(user)
-    });
-    console.log("User Added Successfully..");
-});
-
-Router.get("/getUsers",(req,res)=>{
-    User.find((err,result)=>{
-        if(err){
-            console.log(err);
-        }else{
-            const users = result;
-           res.send(users);
-        }
-    });
-});
-
-Router.put("/updateUser",(req,res)=>{
-    const userId =  req.body.userId;
-    const userName = req.body.userName;
-    const userAddress = req.body.userAddress;
-    const userEmail = req.body.userEmail;
-    const userPw = req.body.userPw;
-    const userPhone = req.body.userPhone;
-    const userType = req.body.userType;
-
-    const query = {userId:userId};
-
-    User.findOneAndUpdate(query,{$set:{
-            userId : userId,
-            userName : userName,
-            userAddress : userAddress,
-            userEmail : userEmail,
-            userPw: userPw,
-            userPhone: userPhone,
-            userType : userType
-    }},(err)=>{
-        if (err) return res.status(500).send(err);
-        return res.status(200).send(userId)
-    });
-    console.log("User Updated Successfully..");
-});
-
-Router.delete("/deleteUser",(req,res)=>{
-    const userId =  req.body.userId;
-    const query = {userId: userId};
-
-    User.findOneAndDelete(query,(err,result)=>{
-        if (err) return res.status(500).send(err);
-        return res.status(200).send(result);
-    });
-    console.log("User Deleted Successfully..");
-});
 
 
 module.exports = Router;
